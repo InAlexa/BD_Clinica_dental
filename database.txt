@@ -1,0 +1,164 @@
+-- Crear la base de datos
+CREATE DATABASE IF NOT EXISTS ClinicaDental;
+USE ClinicaDental;
+
+-- Tabla de Roles
+CREATE TABLE Roles (
+    RolID INT AUTO_INCREMENT PRIMARY KEY,
+    NombreRol VARCHAR(100) NOT NULL,
+    Descripcion TEXT
+);
+
+-- Tabla de Usuarios
+CREATE TABLE Usuarios (
+    UsuarioID INT AUTO_INCREMENT PRIMARY KEY,
+    NombreCompleto VARCHAR(150) NOT NULL,
+    NombreUsuario VARCHAR(50) UNIQUE NOT NULL,
+    ContrasenaHash VARCHAR(255) NOT NULL,
+    RolID INT NOT NULL,
+    Especialidad VARCHAR(100),
+    Telefono VARCHAR(20),
+    Correo VARCHAR(100),
+    Estado VARCHAR(50),
+    FechaIngreso DATE,
+    FOREIGN KEY (RolID) REFERENCES Roles(RolID)
+);
+
+-- Tabla de Pacientes
+CREATE TABLE Pacientes (
+    PacienteID INT AUTO_INCREMENT PRIMARY KEY,
+    NombreCompleto VARCHAR(150) NOT NULL,
+    FechaNacimiento DATE,
+    Sexo VARCHAR(10),
+    Telefono VARCHAR(20),
+    Correo VARCHAR(100),
+    Direccion TEXT,
+    Alergias TEXT,
+    EnfermedadesPreexistentes TEXT,
+    Observaciones TEXT,
+    FechaRegistro DATE
+);
+
+-- Tabla de Tratamientos
+CREATE TABLE Tratamientos (
+    TratamientoID INT AUTO_INCREMENT PRIMARY KEY,
+    NombreTratamiento VARCHAR(100) NOT NULL,
+    Descripcion TEXT,
+    CostoReferencial DECIMAL(10,2),
+    DuracionEstimada INT,
+    Activo BOOLEAN DEFAULT TRUE
+);
+
+-- Tabla de Citas
+CREATE TABLE Citas (
+    CitaID INT AUTO_INCREMENT PRIMARY KEY,
+    PacienteID INT NOT NULL,
+    UsuarioID INT NOT NULL,
+    FechaCita DATE,
+    HoraCita TIME,
+    Motivo TEXT,
+    Estado VARCHAR(50),
+    Observaciones TEXT,
+    FOREIGN KEY (PacienteID) REFERENCES Pacientes(PacienteID),
+    FOREIGN KEY (UsuarioID) REFERENCES Usuarios(UsuarioID)
+);
+
+-- Historial Clínico
+CREATE TABLE Historial (
+    HistorialID INT AUTO_INCREMENT PRIMARY KEY,
+    PacienteID INT NOT NULL,
+    UsuarioID INT NOT NULL,
+    Fecha DATE,
+    Diagnostico TEXT,
+    TratamientoID INT,
+    NotasAdicionales TEXT,
+    FOREIGN KEY (PacienteID) REFERENCES Pacientes(PacienteID),
+    FOREIGN KEY (UsuarioID) REFERENCES Usuarios(UsuarioID),
+    FOREIGN KEY (TratamientoID) REFERENCES Tratamientos(TratamientoID)
+);
+
+-- Ventas
+CREATE TABLE Ventas (
+    VentaID INT AUTO_INCREMENT PRIMARY KEY,
+    Fecha DATE,
+    PacienteID INT NOT NULL,
+    UsuarioID INT NOT NULL,
+    Total DECIMAL(10,2),
+    MetodoPago VARCHAR(50),
+    Observaciones TEXT,
+    FOREIGN KEY (PacienteID) REFERENCES Pacientes(PacienteID),
+    FOREIGN KEY (UsuarioID) REFERENCES Usuarios(UsuarioID)
+);
+
+-- Detalle de Venta
+CREATE TABLE DetalleVenta (
+    DetalleVentaID INT AUTO_INCREMENT PRIMARY KEY,
+    VentaID INT NOT NULL,
+    TratamientoID INT NOT NULL,
+    Cantidad INT,
+    PrecioUnitario DECIMAL(10,2),
+    Subtotal DECIMAL(10,2),
+    FOREIGN KEY (VentaID) REFERENCES Ventas(VentaID),
+    FOREIGN KEY (TratamientoID) REFERENCES Tratamientos(TratamientoID)
+);
+
+-- Proveedores
+CREATE TABLE Proveedores (
+    ProveedorID INT AUTO_INCREMENT PRIMARY KEY,
+    NombreEmpresa VARCHAR(100),
+    NombreContacto VARCHAR(100),
+    Telefono VARCHAR(20),
+    Correo VARCHAR(100),
+    Direccion TEXT,
+    TipoInsumo VARCHAR(100),
+    Notas TEXT
+);
+
+-- Insumos
+CREATE TABLE Insumos (
+    InsumoID INT AUTO_INCREMENT PRIMARY KEY,
+    NombreInsumo VARCHAR(100),
+    Descripcion TEXT,
+    CantidadDisponible INT,
+    UnidadMedida VARCHAR(50),
+    PrecioUnitario DECIMAL(10,2),
+    ProveedorID INT,
+    FechaIngreso DATE,
+    FOREIGN KEY (ProveedorID) REFERENCES Proveedores(ProveedorID)
+);
+
+-- Movimientos de Stock
+CREATE TABLE Stock (
+    MovimientoID INT AUTO_INCREMENT PRIMARY KEY,
+    InsumoID INT NOT NULL,
+    FechaMovimiento DATE,
+    TipoMovimiento VARCHAR(50),
+    Cantidad INT,
+    UsuarioID INT,
+    Observaciones TEXT,
+    FOREIGN KEY (InsumoID) REFERENCES Insumos(InsumoID),
+    FOREIGN KEY (UsuarioID) REFERENCES Usuarios(UsuarioID)
+);
+
+-- Reportes
+CREATE TABLE Reportes (
+    ReporteID INT AUTO_INCREMENT PRIMARY KEY,
+    Titulo VARCHAR(150),
+    FechaGeneracion DATE,
+    UsuarioID INT,
+    TipoReporte VARCHAR(50),
+    FiltroAplicado TEXT,
+    Resultado TEXT,
+    FOREIGN KEY (UsuarioID) REFERENCES Usuarios(UsuarioID)
+);
+
+-- Bitácora del sistema
+CREATE TABLE Bitacora (
+    BitacoraID INT AUTO_INCREMENT PRIMARY KEY,
+    UsuarioID INT NOT NULL,
+    FechaHora DATETIME,
+    AccionRealizada VARCHAR(150),
+    TablaAfectada VARCHAR(100),
+    Descripcion TEXT,
+    FOREIGN KEY (UsuarioID) REFERENCES Usuarios(UsuarioID)
+);
